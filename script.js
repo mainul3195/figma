@@ -342,8 +342,22 @@ expenseForm.addEventListener('submit', (e) => {
 });
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', () => {
-    initializeCharts();
-    updateSummary();
-    attachEventListeners();
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        initializeCharts();
+        updateSummary();
+        attachEventListeners();
+        console.log('Application initialized successfully');
+    } catch (error) {
+        console.error('Error initializing application:', error);
+        alert('There was an error loading the application. Please refresh the page.');
+    }
+});
+
+// Add error handling for Chart.js
+window.addEventListener('error', function(e) {
+    if (e.target.src && e.target.src.includes('chart.js')) {
+        console.error('Error loading Chart.js:', e);
+        alert('There was an error loading the charts. Please check your internet connection and refresh the page.');
+    }
 });
