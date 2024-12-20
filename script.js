@@ -5,6 +5,10 @@ const loginForm = document.getElementById('loginForm');
 const dashboard = document.querySelector('.dashboard');
 const expenseForm = document.getElementById('expenseForm');
 const expensesList = document.getElementById('expensesList');
+const editExpenseModal = document.getElementById('editExpenseModal');
+const deleteExpenseModal = document.getElementById('deleteExpenseModal');
+const editExpenseForm = document.getElementById('editExpenseForm');
+let currentExpenseId = null;
 
 // Dummy user data
 const dummyUsers = [
@@ -149,20 +153,19 @@ function updateSummary() {
 function displayExpenses() {
     const expensesList = document.getElementById('expensesList');
     expensesList.innerHTML = '';
-    
-    // Sort expenses by date (most recent first)
+
     const sortedExpenses = ExpenseTracker.state.expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+
     sortedExpenses.forEach(expense => {
         const expenseElement = document.createElement('div');
         expenseElement.className = 'expense-item';
-        
+
         const formattedDate = new Date(expense.date).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         });
-        
+
         expenseElement.innerHTML = `
             <div class="expense-info">
                 <h4>${expense.title}</h4>
@@ -181,7 +184,7 @@ function displayExpenses() {
                 </div>
             </div>
         `;
-        
+
         expensesList.appendChild(expenseElement);
     });
 }
@@ -196,16 +199,16 @@ function updateUI() {
 function attachEventListeners() {
     const loginBtn = document.getElementById('loginBtn');
     const signupBtn = document.getElementById('signupBtn');
-    
+
     if (loginBtn) {
         loginBtn.addEventListener('click', () => {
             const loginForm = document.getElementById('loginForm');
             const emailInput = loginForm.querySelector('input[type="email"]');
             const passwordInput = loginForm.querySelector('input[type="password"]');
-            
+
             emailInput.value = dummyUsers[0].email;
             passwordInput.value = dummyUsers[0].password;
-            
+
             loginForm.classList.remove('hidden');
             dashboard.classList.add('hidden');
         });
@@ -223,7 +226,7 @@ document.querySelector('#loginForm form').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = e.target.querySelector('input[type="email"]').value;
     const password = e.target.querySelector('input[type="password"]').value;
-    
+
     if (login(email, password)) {
         e.target.reset();
     } else {
@@ -249,6 +252,71 @@ expenseForm.addEventListener('submit', (e) => {
         e.target.reset();
         updateUI();
     }
+});
+
+// Modal Interactions
+document.querySelectorAll('.modal .close').forEach(closeBtn => {
+    closeBtn.addEventListener('click', () => {
+        editExpenseModal.style.display = 'none';
+        deleteExpenseModal.style.display = 'none';
+    });
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === editExpenseModal || e.target === deleteExpenseModal) {
+        editExpenseModal.style.display = 'none';
+        deleteExpenseModal.style.display = 'none';
+    }
+});
+
+// Edit Expense Functions
+function editExpense(id) {
+    currentExpenseId = id;
+    const expense = ExpenseTracker.state.expenses.find(e => e.id === id);
+
+    if (expense) {
+        document.getElementById('editExpenseTitle').value = expense.title;
+        document.getElementById('editExpenseAmount').value = expense.amount;
+        document.getElementById('editExpenseCategory').value = expense.category;
+        editExpenseModal.style.display = 'block';
+    }
+}
+
+editExpenseForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const updatedExpense = {
+        id: currentExpenseId,
+        title: document.getElementById('editExpenseTitle').value,
+        amount: parseFloat(document.getElementById('editExpenseAmount').value),
+        category: document.getElementById('editExpenseCategory').value,
+        date: ExpenseTracker.state.expenses.find(e => e.id === currentExpenseId).date
+    };
+
+    const expenseIndex = ExpenseTracker.state.expenses.findIndex(e => e.id === currentExpenseId);
+    if (expenseIndex !== -1) {
+        ExpenseTracker.state.expenses[expenseIndex] = updatedExpense;
+        ExpenseTracker.saveState();
+        updateUI();
+        editExpenseModal.style.display = 'none';
+    }
+});
+
+// Delete Expense Functions
+function deleteExpense(id) {
+    currentExpenseId = id;
+    deleteExpenseModal.style.display = 'block';
+}
+
+document.getElementById('confirmDelete').addEventListener('click', () => {
+    ExpenseTracker.state.expenses = ExpenseTracker.state.expenses.filter(e => e.id !== currentExpenseId);
+    ExpenseTracker.saveState();
+    updateUI();
+    deleteExpenseModal.style.display = 'none';
+});
+
+document.getElementById('cancelDelete').addEventListener('click', () => {
+    deleteExpenseModal.style.display = 'none';
 });
 
 // Initialize the app
