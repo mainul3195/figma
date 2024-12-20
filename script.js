@@ -186,6 +186,72 @@ function addExpense(title, amount, category) {
     updateCharts();
 }
 
+// Edit expense
+function editExpense(id) {
+    const expense = expenses.find(e => e.id === id);
+    if (expense) {
+        // Fill the form with expense data
+        document.getElementById('expenseTitle').value = expense.title;
+        document.getElementById('expenseAmount').value = expense.amount;
+        document.getElementById('expenseCategory').value = expense.category;
+        
+        // Change form state to edit mode
+        const form = document.getElementById('expenseForm');
+        form.setAttribute('data-edit-id', id);
+        document.querySelector('.add-expense h2').textContent = 'Edit Expense';
+        document.querySelector('#expenseForm button[type="submit"]').textContent = 'Update Expense';
+        
+        // Add cancel button if it doesn't exist
+        if (!document.getElementById('cancelEdit')) {
+            const cancelBtn = document.createElement('button');
+            cancelBtn.id = 'cancelEdit';
+            cancelBtn.type = 'button';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = cancelEditMode;
+            form.appendChild(cancelBtn);
+        }
+    }
+}
+
+function cancelEditMode() {
+    const form = document.getElementById('expenseForm');
+    form.removeAttribute('data-edit-id');
+    form.reset();
+    document.querySelector('.add-expense h2').textContent = 'Add New Expense';
+    document.querySelector('#expenseForm button[type="submit"]').textContent = 'Add Expense';
+    
+    const cancelBtn = document.getElementById('cancelEdit');
+    if (cancelBtn) {
+        cancelBtn.remove();
+    }
+}
+
+function updateExpense(id, title, amount, category) {
+    const index = expenses.findIndex(e => e.id === id);
+    if (index !== -1) {
+        expenses[index] = {
+            ...expenses[index],
+            title,
+            amount: parseFloat(amount),
+            category,
+            date: new Date() // Update the date to show it was modified
+        };
+        updateSummary();
+        displayExpenses();
+        updateCharts();
+        cancelEditMode();
+    }
+}
+
+function deleteExpense(id) {
+    if (confirm('Are you sure you want to delete this expense?')) {
+        expenses = expenses.filter(e => e.id !== id);
+        updateSummary();
+        displayExpenses();
+        updateCharts();
+    }
+}
+
 // Display expenses list
 function displayExpenses() {
     expensesList.innerHTML = '';
@@ -198,7 +264,21 @@ function displayExpenses() {
                 <p>${expense.category}</p>
                 <small>${expense.date.toLocaleDateString()}</small>
             </div>
-            <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
+            <div class="expense-details">
+                <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
+                <div class="expense-actions">
+                    <button class="edit-btn" onclick="editExpense(${expense.id})">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                    <button class="delete-btn" onclick="deleteExpense(${expense.id})">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         `;
         expensesList.appendChild(expenseElement);
     });
@@ -251,8 +331,13 @@ expenseForm.addEventListener('submit', (e) => {
     const category = document.getElementById('expenseCategory').value;
 
     if (title && amount && category) {
-        addExpense(title, amount, category);
-        expenseForm.reset();
+        const editId = e.target.getAttribute('data-edit-id');
+        if (editId) {
+            updateExpense(parseInt(editId), title, amount, category);
+        } else {
+            addExpense(title, amount, category);
+        }
+        e.target.reset();
     }
 });
 

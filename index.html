@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>ExpenseTracker - Manage Your Finances</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -38,7 +41,7 @@
                     <h2>Add New Expense</h2>
                     <form id="expenseForm">
                         <input type="text" id="expenseTitle" placeholder="Expense Title" required>
-                        <input type="number" id="expenseAmount" placeholder="Amount" required>
+                        <input type="number" id="expenseAmount" placeholder="Amount" required step="0.01" min="0">
                         <select id="expenseCategory" required>
                             <option value="">Select Category</option>
                             <option value="food">Food</option>
@@ -68,10 +71,10 @@
         </section>
 
         <section id="loginForm" class="auth-form">
-            <h2>Login</h2>
+            <h2>Login to ExpenseTracker</h2>
             <form>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Password" required>
+                <input type="email" placeholder="Email" required autocomplete="email">
+                <input type="password" placeholder="Password" required autocomplete="current-password">
                 <button type="submit">Login</button>
             </form>
         </section>

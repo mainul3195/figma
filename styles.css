@@ -11,39 +11,51 @@
     --background-color: #f3f4f6;
     --text-color: #1f2937;
     --card-background: #ffffff;
+    --spacing-unit: 1rem;
 }
 
 body {
     background-color: var(--background-color);
     color: var(--text-color);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
 }
 
+/* Mobile-first navbar */
 .navbar {
     background-color: var(--card-background);
-    padding: 1rem 2rem;
+    padding: var(--spacing-unit);
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
     color: var(--primary-color);
 }
 
-.nav-links button {
-    margin-left: 1rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .nav-links span {
-    margin-right: 1rem;
-    color: var(--text-color);
+    display: none; /* Hide welcome text on mobile */
+}
+
+.nav-links button {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
 
 #loginBtn {
@@ -51,70 +63,101 @@ body {
     color: var(--primary-color);
 }
 
-#signupBtn {
+#signupBtn, #logoutBtn {
     background-color: var(--primary-color);
     color: white;
+    white-space: nowrap;
 }
 
-#logoutBtn {
-    background-color: #EF4444;
-    color: white;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
+/* Main content area */
 main {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    padding: var(--spacing-unit);
+    max-width: 100%;
+    margin: 0 auto;
 }
 
+/* Summary cards */
 .summary-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
 }
 
 .card {
     background-color: var(--card-background);
-    padding: 1.5rem;
+    padding: 1.25rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card h3 {
-    color: var(--text-color);
+    font-size: 0.9rem;
     margin-bottom: 0.5rem;
 }
 
 .card p {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
     color: var(--primary-color);
 }
 
+/* Expense section */
 .expense-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-bottom: 2rem;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-unit);
+    margin-bottom: var(--spacing-unit);
 }
 
 .add-expense, .expense-list {
     background-color: var(--card-background);
-    padding: 1.5rem;
+    padding: 1.25rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+form h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+input, select {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+button[type="submit"] {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+}
+
+button[type="submit"]:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Expense list */
 .expense-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
+    align-items: flex-start;
+    padding: 0.75rem;
     border-bottom: 1px solid #ddd;
 }
 
@@ -123,73 +166,105 @@ main {
 }
 
 .expense-info h4 {
+    font-size: 0.9rem;
     margin-bottom: 0.25rem;
-    color: var(--text-color);
 }
 
 .expense-info p {
     color: var(--primary-color);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     margin-bottom: 0.25rem;
 }
 
 .expense-info small {
     color: #666;
+    font-size: 0.75rem;
 }
 
 .expense-amount {
     font-weight: bold;
-    color: var(--text-color);
+    font-size: 0.9rem;
 }
 
-form {
+/* Expense actions */
+.expense-details {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    align-items: flex-end;
+    gap: 0.5rem;
 }
 
-input, select {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
+.expense-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.expense-actions button {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
     border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
 }
 
-button[type="submit"] {
-    background-color: var(--primary-color);
+.edit-btn {
+    color: var(--primary-color);
+}
+
+.delete-btn {
+    color: #EF4444;
+}
+
+.expense-actions button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.expense-actions button:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Cancel button styling */
+#cancelEdit {
+    background-color: #6B7280;
     color: white;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
 }
 
-button[type="submit"]:hover {
-    background-color: var(--secondary-color);
+#cancelEdit:hover {
+    background-color: #4B5563;
 }
 
+/* Charts section */
 .charts-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-unit);
 }
 
 .chart-container {
     background-color: var(--card-background);
-    padding: 1.5rem;
+    padding: 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 300px;
 }
 
-.hidden {
-    display: none;
-}
-
+/* Authentication form */
 .auth-form {
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 2rem auto;
     background-color: var(--card-background);
-    padding: 2rem;
+    padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -197,18 +272,94 @@ button[type="submit"]:hover {
 .auth-form h2 {
     text-align: center;
     margin-bottom: 1.5rem;
+    font-size: 1.25rem;
 }
 
-@media (max-width: 768px) {
+.hidden {
+    display: none;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Tablet Breakpoint */
+@media (min-width: 768px) {
+    main {
+        padding: 2rem;
+        max-width: 768px;
+        margin: 0 auto;
+    }
+
     .summary-cards {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr);
     }
-    
+
+    .nav-links span {
+        display: block;
+    }
+
+    .nav-links button {
+        padding: 0.5rem 1rem;
+    }
+
     .expense-section {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
-    
+
+    .auth-form {
+        max-width: 400px;
+        padding: 2rem;
+    }
+}
+
+/* Desktop Breakpoint */
+@media (min-width: 1024px) {
+    main {
+        max-width: 1024px;
+    }
+
     .charts-section {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .card h3 {
+        font-size: 1rem;
+    }
+
+    .card p {
+        font-size: 1.5rem;
+    }
+
+    .expense-info h4 {
+        font-size: 1rem;
+    }
+
+    .expense-amount {
+        font-size: 1rem;
+    }
+}
+
+/* Large Desktop Breakpoint */
+@media (min-width: 1280px) {
+    main {
+        max-width: 1280px;
+    }
+}
+
+/* Mobile optimization for expense items */
+@media (max-width: 480px) {
+    .expense-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .expense-details {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
     }
 }
