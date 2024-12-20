@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTracker - Manage Your Finances</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">ExpenseTracker</div>
+        <div class="nav-links">
+            <button id="loginBtn">Login</button>
+            <button id="signupBtn">Sign Up</button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="dashboard hidden">
+            <div class="summary-cards">
+                <div class="card">
+                    <h3>Total Budget</h3>
+                    <p id="totalBudget">$0</p>
+                </div>
+                <div class="card">
+                    <h3>Total Expenses</h3>
+                    <p id="totalExpenses">$0</p>
+                </div>
+                <div class="card">
+                    <h3>Remaining</h3>
+                    <p id="remaining">$0</p>
+                </div>
+            </div>
+
+            <div class="expense-section">
+                <div class="add-expense">
+                    <h2>Add New Expense</h2>
+                    <form id="expenseForm">
+                        <input type="text" id="expenseTitle" placeholder="Expense Title" required>
+                        <input type="number" id="expenseAmount" placeholder="Amount" required>
+                        <select id="expenseCategory" required>
+                            <option value="">Select Category</option>
+                            <option value="food">Food</option>
+                            <option value="transport">Transport</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <button type="submit">Add Expense</button>
+                    </form>
+                </div>
+
+                <div class="expense-list">
+                    <h2>Recent Expenses</h2>
+                    <div id="expensesList"></div>
+                </div>
+            </div>
+
+            <div class="charts-section">
+                <div class="chart-container">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="loginForm" class="auth-form">
+            <h2>Login</h2>
+            <form>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
