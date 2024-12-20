@@ -12,60 +12,48 @@ const dummyUsers = [
     { email: 'demo@example.com', password: 'demo123', name: 'Demo User' }
 ];
 
-// Dummy expense data
-const dummyExpenses = [
-    { id: 1, title: 'Grocery Shopping', amount: 150.50, category: 'food', date: new Date('2024-12-19') },
-    { id: 2, title: 'Bus Ticket', amount: 25.00, category: 'transport', date: new Date('2024-12-18') },
-    { id: 3, title: 'Electricity Bill', amount: 80.00, category: 'utilities', date: new Date('2024-12-17') },
-    { id: 4, title: 'Movie Night', amount: 45.00, category: 'entertainment', date: new Date('2024-12-16') }
-];
-
-// State
-let currentUser = null;
-let expenses = [...dummyExpenses];
-let totalBudget = 2000; // Default budget
-
 // Authentication functions
 function login(email, password) {
     const user = dummyUsers.find(u => u.email === email && u.password === password);
     if (user) {
-        currentUser = user;
+        ExpenseTracker.setUser(user);
         loginForm.classList.add('hidden');
         dashboard.classList.remove('hidden');
-        document.querySelector('.navbar').innerHTML = `
-            <div class="logo">ExpenseTracker</div>
-            <div class="nav-links">
-                <span>Welcome, ${user.name}</span>
-                <button id="logoutBtn" onclick="logout()">Logout</button>
-            </div>
-        `;
-        loadDummyData();
+        updateNavigation();
+        ExpenseTracker.loadDummyData();
+        updateUI();
         return true;
     }
     return false;
 }
 
 function logout() {
-    currentUser = null;
-    expenses = [];
+    ExpenseTracker.clearUser();
     dashboard.classList.add('hidden');
     loginForm.classList.remove('hidden');
-    document.querySelector('.navbar').innerHTML = `
+    updateNavigation();
+}
+
+function updateNavigation() {
+    const isAuthenticated = ExpenseTracker.isAuthenticated();
+    document.querySelector('.navbar').innerHTML = isAuthenticated ? `
+        <div class="logo">ExpenseTracker</div>
+        <div class="nav-links">
+            <a href="./index.html" class="nav-link active">Dashboard</a>
+            <a href="./analysis.html" class="nav-link">Analysis</a>
+            <button id="logoutBtn" onclick="logout()">Logout</button>
+        </div>
+    ` : `
         <div class="logo">ExpenseTracker</div>
         <div class="nav-links">
             <button id="loginBtn">Login</button>
             <button id="signupBtn">Sign Up</button>
         </div>
     `;
-    // Reattach event listeners after DOM change
-    attachEventListeners();
-}
 
-function loadDummyData() {
-    expenses = [...dummyExpenses];
-    updateSummary();
-    displayExpenses();
-    updateCharts();
+    if (!isAuthenticated) {
+        attachEventListeners();
+    }
 }
 
 // Initialize charts
@@ -110,7 +98,7 @@ function initializeCharts() {
             datasets: [
                 {
                     label: 'Budget',
-                    data: [totalBudget],
+                    data: [ExpenseTracker.state.totalBudget],
                     backgroundColor: '#10B981'
                 },
                 {
@@ -138,131 +126,36 @@ function initializeCharts() {
 }
 
 function updateCharts() {
-    // Update expense by category chart
-    const categoryTotals = {
-        food: 0,
-        transport: 0,
-        utilities: 0,
-        entertainment: 0,
-        other: 0
-    };
-
-    expenses.forEach(expense => {
-        categoryTotals[expense.category] += expense.amount;
-    });
-
+    const categoryTotals = ExpenseTracker.getCategoryExpenses();
     expenseChart.data.datasets[0].data = Object.values(categoryTotals);
     expenseChart.update();
 
-    // Update budget vs expenses chart
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const totalExpenses = ExpenseTracker.getTotalExpenses();
     budgetChart.data.datasets[1].data = [totalExpenses];
     budgetChart.update();
 }
 
 // Update dashboard summary
 function updateSummary() {
-    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-    const remaining = totalBudget - totalExpenses;
+    const totalExpenses = ExpenseTracker.getTotalExpenses();
+    const remaining = ExpenseTracker.state.totalBudget - totalExpenses;
 
-    document.getElementById('totalBudget').textContent = `$${totalBudget.toFixed(2)}`;
+    document.getElementById('totalBudget').textContent = `$${ExpenseTracker.state.totalBudget.toFixed(2)}`;
     document.getElementById('totalExpenses').textContent = `$${totalExpenses.toFixed(2)}`;
     document.getElementById('remaining').textContent = `$${remaining.toFixed(2)}`;
-}
-
-// Add new expense
-function addExpense(title, amount, category) {
-    const expense = {
-        id: Date.now(),
-        title,
-        amount: parseFloat(amount),
-        category,
-        date: new Date()
-    };
-
-    expenses.push(expense);
-    updateSummary();
-    displayExpenses();
-    updateCharts();
-}
-
-// Edit expense
-function editExpense(id) {
-    const expense = expenses.find(e => e.id === id);
-    if (expense) {
-        // Fill the form with expense data
-        document.getElementById('expenseTitle').value = expense.title;
-        document.getElementById('expenseAmount').value = expense.amount;
-        document.getElementById('expenseCategory').value = expense.category;
-        
-        // Change form state to edit mode
-        const form = document.getElementById('expenseForm');
-        form.setAttribute('data-edit-id', id);
-        document.querySelector('.add-expense h2').textContent = 'Edit Expense';
-        document.querySelector('#expenseForm button[type="submit"]').textContent = 'Update Expense';
-        
-        // Add cancel button if it doesn't exist
-        if (!document.getElementById('cancelEdit')) {
-            const cancelBtn = document.createElement('button');
-            cancelBtn.id = 'cancelEdit';
-            cancelBtn.type = 'button';
-            cancelBtn.textContent = 'Cancel';
-            cancelBtn.onclick = cancelEditMode;
-            form.appendChild(cancelBtn);
-        }
-    }
-}
-
-function cancelEditMode() {
-    const form = document.getElementById('expenseForm');
-    form.removeAttribute('data-edit-id');
-    form.reset();
-    document.querySelector('.add-expense h2').textContent = 'Add New Expense';
-    document.querySelector('#expenseForm button[type="submit"]').textContent = 'Add Expense';
-    
-    const cancelBtn = document.getElementById('cancelEdit');
-    if (cancelBtn) {
-        cancelBtn.remove();
-    }
-}
-
-function updateExpense(id, title, amount, category) {
-    const index = expenses.findIndex(e => e.id === id);
-    if (index !== -1) {
-        expenses[index] = {
-            ...expenses[index],
-            title,
-            amount: parseFloat(amount),
-            category,
-            date: new Date() // Update the date to show it was modified
-        };
-        updateSummary();
-        displayExpenses();
-        updateCharts();
-        cancelEditMode();
-    }
-}
-
-function deleteExpense(id) {
-    if (confirm('Are you sure you want to delete this expense?')) {
-        expenses = expenses.filter(e => e.id !== id);
-        updateSummary();
-        displayExpenses();
-        updateCharts();
-    }
 }
 
 // Display expenses list
 function displayExpenses() {
     expensesList.innerHTML = '';
-    expenses.slice().reverse().forEach(expense => {
+    ExpenseTracker.state.expenses.slice().reverse().forEach(expense => {
         const expenseElement = document.createElement('div');
         expenseElement.className = 'expense-item';
         expenseElement.innerHTML = `
             <div class="expense-info">
                 <h4>${expense.title}</h4>
                 <p>${expense.category}</p>
-                <small>${expense.date.toLocaleDateString()}</small>
+                <small>${new Date(expense.date).toLocaleDateString()}</small>
             </div>
             <div class="expense-details">
                 <div class="expense-amount">$${expense.amount.toFixed(2)}</div>
@@ -284,6 +177,12 @@ function displayExpenses() {
     });
 }
 
+function updateUI() {
+    updateSummary();
+    displayExpenses();
+    updateCharts();
+}
+
 // Event Listeners
 function attachEventListeners() {
     const loginBtn = document.getElementById('loginBtn');
@@ -291,7 +190,6 @@ function attachEventListeners() {
     
     if (loginBtn) {
         loginBtn.addEventListener('click', () => {
-            // Auto-fill the login form with dummy data
             const loginForm = document.getElementById('loginForm');
             const emailInput = loginForm.querySelector('input[type="email"]');
             const passwordInput = loginForm.querySelector('input[type="password"]');
@@ -324,40 +222,40 @@ document.querySelector('#loginForm form').addEventListener('submit', (e) => {
     }
 });
 
+// Handle expense form submission
 expenseForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const title = document.getElementById('expenseTitle').value;
-    const amount = document.getElementById('expenseAmount').value;
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
     const category = document.getElementById('expenseCategory').value;
 
     if (title && amount && category) {
         const editId = e.target.getAttribute('data-edit-id');
         if (editId) {
-            updateExpense(parseInt(editId), title, amount, category);
+            ExpenseTracker.updateExpense(parseInt(editId), { title, amount, category });
+            cancelEditMode();
         } else {
-            addExpense(title, amount, category);
+            ExpenseTracker.addExpense({ title, amount, category });
         }
         e.target.reset();
+        updateUI();
     }
 });
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     try {
+        ExpenseTracker.init();
+        if (ExpenseTracker.isAuthenticated()) {
+            dashboard.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            updateNavigation();
+        }
         initializeCharts();
-        updateSummary();
-        attachEventListeners();
+        updateUI();
         console.log('Application initialized successfully');
     } catch (error) {
         console.error('Error initializing application:', error);
         alert('There was an error loading the application. Please refresh the page.');
-    }
-});
-
-// Add error handling for Chart.js
-window.addEventListener('error', function(e) {
-    if (e.target.src && e.target.src.includes('chart.js')) {
-        console.error('Error loading Chart.js:', e);
-        alert('There was an error loading the charts. Please check your internet connection and refresh the page.');
     }
 });
